@@ -3,29 +3,598 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Plan de Trivias Kaizen - Casabaca</title>
+  <title>Trivia Kaizen - Casabaca</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #f4f6f9;
+    :root {
+      --primary: #d71920;
+      --primary-dark: #a81016;
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --success: #16a34a;
+      --border: #e5e7eb;
     }
-    iframe {
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+      padding: 22px;
+      border-top: 5px solid var(--primary);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #fee2e2;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    p.subtitle {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .form-group {
+      margin-top: 18px;
+    }
+
+    label {
       display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    input[type="tel"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 18px;
+      letter-spacing: 1.5px;
+      text-align: center;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+      user-select: text;
+    }
+
+    input[type="tel"]:focus {
+      border-color: var(--primary);
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--primary);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      display: none;
+    }
+
+    .alert.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      display: block;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Pantalla de juego */
+    .player-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f9fafb;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+      font-size: 12.5px;
+    }
+
+    .player-name {
+      font-weight: 700;
+      color: var(--text);
+      max-width: 72%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .timer {
+      font-family: monospace;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .words-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .word-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      border: 1px solid var(--border);
+      transition: all 0.25s;
+    }
+
+    .word-chip.found {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #86efac;
+      text-decoration: line-through;
+    }
+
+    .grid-wrapper {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      touch-action: none;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
       width: 100%;
       height: 100%;
-      border: none;
+      gap: 3px;
+      background: #e5e7eb;
+      padding: 4px;
+      border-radius: 12px;
+    }
+
+    .cell {
+      background: #ffffff;
+      border-radius: 6px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 800;
+      font-size: clamp(13px, 4vw, 18px);
+      color: var(--text);
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .cell.selecting {
+      background: #fee2e2;
+      color: var(--primary);
+    }
+
+    .cell.found {
+      background: var(--success);
+      color: #ffffff;
+    }
+
+    /* Pantalla final */
+    .result-box {
+      text-align: center;
+      padding: 16px 8px;
+    }
+
+    .check-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #dcfce7;
+      color: var(--success);
+      font-size: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+
+    .time-pill {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #f3f4f6;
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
     }
   </style>
 </head>
 <body>
-  <iframe 
-    src="https://script.google.com/macros/s/AKfycbweQU7xlFZhoFw-t4NAdu1sBeciLSI6hLhUz4vM-tYDt3hMMBeK_a9etS1v7EPxJhkA/exec"
-    allow="clipboard-write"
-    sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
-  </iframe>
+  <div class="container">
+    <!-- PASO 1: LOGIN -->
+    <div id="view-login">
+      <div class="header">
+        <span class="badge">CULTURA KAIZEN • CASABACA</span>
+        <h1>Sopa de Letras Kaizen</h1>
+        <p class="subtitle">Ingresa tu número de cédula para iniciar el reto</p>
+      </div>
+
+      <div class="form-group">
+        <label for="cedula">Número de Cédula (10 dígitos)</label>
+        <input type="tel" id="cedula" maxlength="10" placeholder="Ej: 1712345678" inputmode="numeric">
+      </div>
+
+      <button id="btn-iniciar" onclick="handleIniciar()">Ingresar y Comenzar</button>
+      <div id="login-alert" class="alert"></div>
+    </div>
+
+    <!-- PASO 2: JUEGO -->
+    <div id="view-game" class="hidden">
+      <div class="player-bar">
+        <div class="player-name" id="lbl-nombre">COLABORADOR</div>
+        <div class="timer" id="lbl-timer">00:00</div>
+      </div>
+
+      <div class="words-list" id="words-list"></div>
+
+      <div class="grid-wrapper">
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+    <!-- PASO 3: FINALIZADO -->
+    <div id="view-done" class="hidden">
+      <div class="result-box">
+        <div class="check-circle">✓</div>
+        <h2>¡Actividad Completada!</h2>
+        <p class="subtitle" id="done-msg">Tu participación ha sido registrada exitosamente.</p>
+        <div class="time-pill" id="done-time">00:00:00</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbweQU7xlFZhoFw-t4NAdu1sBeciLSI6hLhUz4vM-tYDt3hMMBeK_a9etS1v7EPxJhkA/exec";
+
+    let sessionData = null;
+    let timerInterval = null;
+    let startTimeClient = 0;
+
+    let gridSize = 10;
+    let board = [];
+    let targetWords = [];
+    let foundWords = new Set();
+
+    let isSelecting = false;
+    let startCell = null;
+    let currentSelection = [];
+
+    async function callApi(payload) {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        credentials: "omit",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        throw new Error("Error de conexión con el servidor (" + response.status + ")");
+      }
+      return await response.json();
+    }
+
+    async function handleIniciar() {
+      const cedulaInput = document.getElementById("cedula").value.trim();
+      const btn = document.getElementById("btn-iniciar");
+      const alertBox = document.getElementById("login-alert");
+
+      alertBox.className = "alert";
+      alertBox.textContent = "";
+
+      if (!/^\d{9,10}$/.test(cedulaInput)) {
+        alertBox.className = "alert error";
+        alertBox.textContent = "Por favor ingresa un número de cédula válido de 10 dígitos.";
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Validando...";
+
+      try {
+        const res = await callApi({ action: "iniciar", cedula: cedulaInput });
+        if (!res.ok) {
+          alertBox.className = "alert error";
+          alertBox.textContent = res.mensaje;
+          btn.disabled = false;
+          btn.textContent = "Ingresar y Comenzar";
+          return;
+        }
+
+        sessionData = {
+          cedula: cedulaInput,
+          fila: res.fila,
+          inicioMs: res.inicioMs,
+          nombre: res.nombre,
+          codigoTrivia: res.codigoTrivia
+        };
+
+        targetWords = res.palabras;
+        gridSize = res.gridSize || 10;
+
+        iniciarJuego();
+      } catch (err) {
+        alertBox.className = "alert error";
+        alertBox.textContent = "No se pudo conectar con el servidor. Verifica tu internet e intenta nuevamente.";
+        btn.disabled = false;
+        btn.textContent = "Ingresar y Comenzar";
+      }
+    }
+
+    function iniciarJuego() {
+      document.getElementById("view-login").classList.add("hidden");
+      document.getElementById("view-game").classList.remove("hidden");
+      document.getElementById("lbl-nombre").textContent = sessionData.nombre;
+
+      generarTablero();
+      renderizarPalabras();
+      renderizarTablero();
+
+      startTimeClient = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTimeClient) / 1000);
+        const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
+        const secs = String(elapsed % 60).padStart(2, "0");
+        document.getElementById("lbl-timer").textContent = `${mins}:${secs}`;
+      }, 500);
+    }
+
+    function generarTablero() {
+      board = Array.from({ length: gridSize }, () => Array(gridSize).fill(""));
+      const dirs = [
+        [0, 1], [1, 0], [1, 1], [-1, 1],
+        [0, -1], [-1, 0], [-1, -1], [1, -1]
+      ];
+
+      for (const word of targetWords) {
+        let placed = false;
+        let attempts = 0;
+        while (!placed && attempts < 200) {
+          attempts++;
+          const dir = dirs[Math.floor(Math.random() * dirs.length)];
+          const r0 = Math.floor(Math.random() * gridSize);
+          const c0 = Math.floor(Math.random() * gridSize);
+
+          let fits = true;
+          for (let i = 0; i < word.length; i++) {
+            const r = r0 + dir[0] * i;
+            const c = c0 + dir[1] * i;
+            if (r < 0 || r >= gridSize || c < 0 || c >= gridSize) {
+              fits = false;
+              break;
+            }
+            if (board[r][c] !== "" && board[r][c] !== word[i]) {
+              fits = false;
+              break;
+            }
+          }
+
+          if (fits) {
+            for (let i = 0; i < word.length; i++) {
+              board[r0 + dir[0] * i][c0 + dir[1] * i] = word[i];
+            }
+            placed = true;
+          }
+        }
+      }
+
+      const letters = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          if (board[r][c] === "") {
+            board[r][c] = letters[Math.floor(Math.random() * letters.length)];
+          }
+        }
+      }
+    }
+
+    function renderizarPalabras() {
+      const container = document.getElementById("words-list");
+      container.innerHTML = "";
+      targetWords.forEach(w => {
+        const chip = document.createElement("div");
+        chip.className = "word-chip" + (foundWords.has(w) ? " found" : "");
+        chip.textContent = w;
+        chip.id = "chip-" + w;
+        container.appendChild(chip);
+      });
+    }
+
+    function renderizarTablero() {
+      const grid = document.getElementById("grid");
+      grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+      grid.innerHTML = "";
+
+      for (let r = 0; r < gridSize; r++) {
+        for (let c = 0; c < gridSize; c++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          cell.textContent = board[r][c];
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          grid.appendChild(cell);
+        }
+      }
+
+      grid.addEventListener("pointerdown", onPointerDown);
+      grid.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+    }
+
+    function getCellFromPoint(x, y) {
+      const el = document.elementFromPoint(x, y);
+      if (el && el.classList.contains("cell")) {
+        return { r: Number(el.dataset.r), c: Number(el.dataset.c) };
+      }
+      return null;
+    }
+
+    function onPointerDown(e) {
+      const cell = getCellFromPoint(e.clientX, e.clientY);
+      if (!cell) return;
+      isSelecting = true;
+      startCell = cell;
+      updateSelection(cell);
+    }
+
+    function onPointerMove(e) {
+      if (!isSelecting || !startCell) return;
+      const cell = getCellFromPoint(e.clientX, e.clientY);
+      if (cell) updateSelection(cell);
+    }
+
+    function updateSelection(endCell) {
+      document.querySelectorAll(".cell.selecting").forEach(el => el.classList.remove("selecting"));
+      currentSelection = [];
+
+      const dr = endCell.r - startCell.r;
+      const dc = endCell.c - startCell.c;
+      const steps = Math.max(Math.abs(dr), Math.abs(dc));
+
+      if (steps === 0) {
+        currentSelection = [startCell];
+      } else if (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) {
+        const stepR = dr === 0 ? 0 : dr / Math.abs(dr);
+        const stepC = dc === 0 ? 0 : dc / Math.abs(dc);
+        for (let i = 0; i <= steps; i++) {
+          currentSelection.push({
+            r: startCell.r + stepR * i,
+            c: startCell.c + stepC * i
+          });
+        }
+      }
+
+      currentSelection.forEach(pos => {
+        const el = document.querySelector(`.cell[data-r="${pos.r}"][data-c="${pos.c}"]`);
+        if (el) el.classList.add("selecting");
+      });
+    }
+
+    function onPointerUp() {
+      if (!isSelecting) return;
+      isSelecting = false;
+
+      const word = currentSelection.map(p => board[p.r][p.c]).join("");
+      const reversed = word.split("").reverse().join("");
+
+      const matched = targetWords.find(w => !foundWords.has(w) && (w === word || w === reversed));
+      if (matched) {
+        foundWords.add(matched);
+        currentSelection.forEach(pos => {
+          const el = document.querySelector(`.cell[data-r="${pos.r}"][data-c="${pos.c}"]`);
+          if (el) el.classList.add("found");
+        });
+        const chip = document.getElementById("chip-" + matched);
+        if (chip) chip.classList.add("found");
+
+        if (foundWords.size === targetWords.length) {
+          finalizarJuego();
+        }
+      }
+
+      document.querySelectorAll(".cell.selecting").forEach(el => el.classList.remove("selecting"));
+      currentSelection = [];
+      startCell = null;
+    }
+
+    async function finalizarJuego() {
+      clearInterval(timerInterval);
+      document.getElementById("view-game").classList.add("hidden");
+      document.getElementById("view-done").classList.remove("hidden");
+      document.getElementById("done-msg").textContent = "Guardando tu tiempo...";
+
+      try {
+        const res = await callApi({
+          action: "finalizar",
+          fila: sessionData.fila,
+          cedula: sessionData.cedula,
+          inicioMs: sessionData.inicioMs,
+          encontradas: foundWords.size
+        });
+
+        if (res.ok) {
+          document.getElementById("done-msg").textContent =
+            `¡Excelente trabajo, ${sessionData.nombre}! Tu tiempo oficial es:`;
+          document.getElementById("done-time").textContent = res.tiempo;
+        } else {
+          document.getElementById("done-msg").textContent = res.mensaje;
+        }
+      } catch (err) {
+        document.getElementById("done-msg").textContent =
+          "Completaste la sopa, pero hubo un problema de red al confirmar el cierre.";
+      }
+    }
+  </script>
 </body>
 </html>
