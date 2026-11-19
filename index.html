@@ -124,6 +124,20 @@
       cursor: not-allowed;
     }
 
+    button.btn-secondary {
+      background: #4b5563;
+      margin-top: 16px;
+    }
+
+    button.btn-outline {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      margin-top: 10px;
+      font-size: 14px;
+      padding: 10px;
+    }
+
     .alert {
       margin-top: 14px;
       padding: 12px;
@@ -142,6 +156,63 @@
 
     .hidden {
       display: none !important;
+    }
+
+    /* Ficha de colaborador e instrucciones */
+    .profile-card {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: 13.5px;
+    }
+
+    .profile-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px dashed #e5e7eb;
+    }
+
+    .profile-row:last-child {
+      border-bottom: none;
+    }
+
+    .profile-label {
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .profile-val {
+      font-weight: 700;
+      color: var(--text);
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .instructions-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 8px;
+      font-size: 13.5px;
+      color: #78350f;
+    }
+
+    .instructions-box h3 {
+      margin: 0 0 8px;
+      font-size: 14.5px;
+      color: #92400e;
+    }
+
+    .instructions-box ul {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.5;
     }
 
     /* Pantalla de juego */
@@ -268,16 +339,29 @@
       font-weight: 800;
       color: var(--primary);
     }
+
+    .stats-pill {
+      margin-top: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .sync-status {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- PASO 1: LOGIN -->
+    <!-- PASO 1: VALIDAR CÉDULA -->
     <div id="view-login">
       <div class="header">
         <span class="badge">CULTURA KAIZEN • CASABACA</span>
         <h1>Sopa de Letras Kaizen</h1>
-        <p class="subtitle">Ingresa tu número de cédula para iniciar el reto</p>
+        <p class="subtitle">Ingresa tu número de cédula para validar tus datos</p>
       </div>
 
       <div class="form-group">
@@ -285,11 +369,56 @@
         <input type="tel" id="cedula" maxlength="10" placeholder="Ej: 1712345678" inputmode="numeric">
       </div>
 
-      <button id="btn-iniciar" onclick="handleIniciar()">Ingresar y Comenzar</button>
+      <button id="btn-validar" onclick="handleValidar()">Validar Colaborador</button>
       <div id="login-alert" class="alert"></div>
     </div>
 
-    <!-- PASO 2: JUEGO -->
+    <!-- PASO 2: FICHA DE COLABORADOR E INSTRUCCIONES -->
+    <div id="view-instructions" class="hidden">
+      <div class="header">
+        <span class="badge" id="badge-trivia">TRIVIA ACTIVA</span>
+        <h1>Bienvenido(a)</h1>
+        <p class="subtitle">Verifica tus datos antes de iniciar el cronómetro</p>
+      </div>
+
+      <div class="profile-card">
+        <div class="profile-row">
+          <span class="profile-label">Colaborador:</span>
+          <span class="profile-val" id="info-nombre">-</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Cédula:</span>
+          <span class="profile-val" id="info-cedula">-</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Empresa / Agencia:</span>
+          <span class="profile-val" id="info-agencia">-</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Cargo:</span>
+          <span class="profile-val" id="info-puesto">-</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Correo:</span>
+          <span class="profile-val" id="info-correo">-</span>
+        </div>
+      </div>
+
+      <div class="instructions-box">
+        <h3>Instrucciones de la Actividad</h3>
+        <ul>
+          <li>Desliza tu dedo (o el puntero) sobre las letras para marcar cada palabra oculta en la sopa de letras.</li>
+          <li>Al presionar <strong>Comenzar Actividad</strong> iniciará tu tiempo oficial y solo tienes <strong>1 intento</strong>.</li>
+          <li>Al encontrar la última palabra el reto finalizará automáticamente, o puedes usar el botón <strong>Finalizar Actividad</strong> si deseas terminar antes.</li>
+        </ul>
+      </div>
+
+      <button id="btn-comenzar" onclick="handleComenzar()">Comenzar Actividad</button>
+      <button class="btn-outline" onclick="volverLogin()">Cambiar cédula</button>
+      <div id="inst-alert" class="alert"></div>
+    </div>
+
+    <!-- PASO 3: JUEGO -->
     <div id="view-game" class="hidden">
       <div class="player-bar">
         <div class="player-name" id="lbl-nombre">COLABORADOR</div>
@@ -301,15 +430,19 @@
       <div class="grid-wrapper">
         <div class="grid" id="grid"></div>
       </div>
+
+      <button id="btn-finalizar" class="btn-secondary" onclick="confirmarFinalizarManual()">Finalizar Actividad</button>
     </div>
 
-    <!-- PASO 3: FINALIZADO -->
+    <!-- PASO 4: RESULTADO FINAL -->
     <div id="view-done" class="hidden">
       <div class="result-box">
         <div class="check-circle">✓</div>
         <h2>¡Actividad Completada!</h2>
-        <p class="subtitle" id="done-msg">Tu participación ha sido registrada exitosamente.</p>
+        <p class="subtitle" id="done-msg">Gracias por participar en Cultura Kaizen.</p>
         <div class="time-pill" id="done-time">00:00:00</div>
+        <div class="stats-pill" id="done-stats"></div>
+        <div class="sync-status" id="done-sync">Guardando registro oficial...</div>
       </div>
     </div>
   </div>
@@ -317,9 +450,11 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbweQU7xlFZhoFw-t4NAdu1sBeciLSI6hLhUz4vM-tYDt3hMMBeK_a9etS1v7EPxJhkA/exec";
 
+    let validatedUser = null;
     let sessionData = null;
     let timerInterval = null;
     let startTimeClient = 0;
+    let juegoFinalizado = false;
 
     let gridSize = 10;
     let board = [];
@@ -345,9 +480,22 @@
       return await response.json();
     }
 
-    async function handleIniciar() {
+    function formatearSegundosHHMMSS(segundosTotales) {
+      const seg = Math.max(1, Math.round(segundosTotales));
+      const h = Math.floor(seg / 3600);
+      const m = Math.floor((seg % 3600) / 60);
+      const s = seg % 60;
+      return [
+        String(h).padStart(2, "0"),
+        String(m).padStart(2, "0"),
+        String(s).padStart(2, "0")
+      ].join(":");
+    }
+
+    // PASO 1: Validar cédula y mostrar ficha + instrucciones
+    async function handleValidar() {
       const cedulaInput = document.getElementById("cedula").value.trim();
-      const btn = document.getElementById("btn-iniciar");
+      const btn = document.getElementById("btn-validar");
       const alertBox = document.getElementById("login-alert");
 
       alertBox.className = "alert";
@@ -360,24 +508,72 @@
       }
 
       btn.disabled = true;
-      btn.textContent = "Validando...";
+      btn.textContent = "Validando datos...";
 
       try {
-        const res = await callApi({ action: "iniciar", cedula: cedulaInput });
+        const res = await callApi({ action: "validar", cedula: cedulaInput });
         if (!res.ok) {
           alertBox.className = "alert error";
           alertBox.textContent = res.mensaje;
           btn.disabled = false;
-          btn.textContent = "Ingresar y Comenzar";
+          btn.textContent = "Validar Colaborador";
+          return;
+        }
+
+        validatedUser = res.colaborador;
+
+        document.getElementById("badge-trivia").textContent = `${res.codigoTrivia} • ${res.cantidadPalabras} PALABRAS`;
+        document.getElementById("info-nombre").textContent = validatedUser.nombre;
+        document.getElementById("info-cedula").textContent = validatedUser.cedula;
+        document.getElementById("info-agencia").textContent = [validatedUser.empresa, validatedUser.agencia].filter(Boolean).join(" - ");
+        document.getElementById("info-puesto").textContent = validatedUser.puesto || "-";
+        document.getElementById("info-correo").textContent = validatedUser.correo || "-";
+
+        document.getElementById("view-login").classList.add("hidden");
+        document.getElementById("view-instructions").classList.remove("hidden");
+      } catch (err) {
+        alertBox.className = "alert error";
+        alertBox.textContent = "No se pudo conectar con el servidor. Verifica tu internet e intenta nuevamente.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Validar Colaborador";
+      }
+    }
+
+    function volverLogin() {
+      validatedUser = null;
+      document.getElementById("view-instructions").classList.add("hidden");
+      document.getElementById("view-login").classList.remove("hidden");
+    }
+
+    // PASO 2: Iniciar actividad y registrar hora de inicio en ACT1
+    async function handleComenzar() {
+      if (!validatedUser) return;
+      const btn = document.getElementById("btn-comenzar");
+      const alertBox = document.getElementById("inst-alert");
+
+      alertBox.className = "alert";
+      alertBox.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Preparando sopa de letras...";
+
+      try {
+        const res = await callApi({ action: "iniciar", cedula: validatedUser.cedula });
+        if (!res.ok) {
+          alertBox.className = "alert error";
+          alertBox.textContent = res.mensaje;
+          btn.disabled = false;
+          btn.textContent = "Comenzar Actividad";
           return;
         }
 
         sessionData = {
-          cedula: cedulaInput,
+          cedula: validatedUser.cedula,
           fila: res.fila,
           inicioMs: res.inicioMs,
           nombre: res.nombre,
-          codigoTrivia: res.codigoTrivia
+          codigoTrivia: res.codigoTrivia,
+          direcciones: res.direcciones
         };
 
         targetWords = res.palabras;
@@ -386,14 +582,16 @@
         iniciarJuego();
       } catch (err) {
         alertBox.className = "alert error";
-        alertBox.textContent = "No se pudo conectar con el servidor. Verifica tu internet e intenta nuevamente.";
+        alertBox.textContent = "Error al iniciar la actividad. Intenta nuevamente.";
         btn.disabled = false;
-        btn.textContent = "Ingresar y Comenzar";
+        btn.textContent = "Comenzar Actividad";
       }
     }
 
     function iniciarJuego() {
-      document.getElementById("view-login").classList.add("hidden");
+      juegoFinalizado = false;
+      foundWords.clear();
+      document.getElementById("view-instructions").classList.add("hidden");
       document.getElementById("view-game").classList.remove("hidden");
       document.getElementById("lbl-nombre").textContent = sessionData.nombre;
 
@@ -407,20 +605,36 @@
         const mins = String(Math.floor(elapsed / 60)).padStart(2, "0");
         const secs = String(elapsed % 60).padStart(2, "0");
         document.getElementById("lbl-timer").textContent = `${mins}:${secs}`;
-      }, 500);
+      }, 250);
+    }
+
+    function obtenerVectoresDireccion() {
+      const mapa = {
+        "H_DER": [0, 1],
+        "H_IZQ": [0, -1],
+        "V_ABAJO": [1, 0],
+        "V_ARRIBA": [-1, 0],
+        "DIAG_ABAJO_DER": [1, 1],
+        "DIAG_ARRIBA_DER": [-1, 1],
+        "DIAG_ABAJO_IZQ": [1, -1],
+        "DIAG_ARRIBA_IZQ": [-1, -1]
+      };
+      const lista = String(sessionData.direcciones || "")
+        .split(",")
+        .map(d => mapa[d.trim()])
+        .filter(Boolean);
+
+      return lista.length > 0 ? lista : [[0, 1], [1, 0], [1, 1], [-1, 1]];
     }
 
     function generarTablero() {
       board = Array.from({ length: gridSize }, () => Array(gridSize).fill(""));
-      const dirs = [
-        [0, 1], [1, 0], [1, 1], [-1, 1],
-        [0, -1], [-1, 0], [-1, -1], [1, -1]
-      ];
+      const dirs = obtenerVectoresDireccion();
 
       for (const word of targetWords) {
         let placed = false;
         let attempts = 0;
-        while (!placed && attempts < 200) {
+        while (!placed && attempts < 250) {
           attempts++;
           const dir = dirs[Math.floor(Math.random() * dirs.length)];
           const r0 = Math.floor(Math.random() * gridSize);
@@ -501,6 +715,7 @@
     }
 
     function onPointerDown(e) {
+      if (juegoFinalizado) return;
       const cell = getCellFromPoint(e.clientX, e.clientY);
       if (!cell) return;
       isSelecting = true;
@@ -509,7 +724,7 @@
     }
 
     function onPointerMove(e) {
-      if (!isSelecting || !startCell) return;
+      if (!isSelecting || !startCell || juegoFinalizado) return;
       const cell = getCellFromPoint(e.clientX, e.clientY);
       if (cell) updateSelection(cell);
     }
@@ -568,31 +783,54 @@
       startCell = null;
     }
 
+    function confirmarFinalizarManual() {
+      if (juegoFinalizado) return;
+      const faltantes = targetWords.length - foundWords.size;
+      if (faltantes > 0) {
+        const ok = confirm(`Aún te faltan ${faltantes} palabra(s). ¿Deseas finalizar la actividad de todas formas?`);
+        if (!ok) return;
+      }
+      finalizarJuego();
+    }
+
+    // PASO 3: Cierre inmediato sin lag visual + guardado en segundo plano
     async function finalizarJuego() {
+      if (juegoFinalizado) return;
+      juegoFinalizado = true;
       clearInterval(timerInterval);
+
+      // Cálculo inmediato del tiempo en pantalla para evitar lag de 00:00:00
+      const segundosTranscurridos = (Date.now() - startTimeClient) / 1000;
+      const tiempoInmediato = formatearSegundosHHMMSS(segundosTranscurridos);
+
       document.getElementById("view-game").classList.add("hidden");
       document.getElementById("view-done").classList.remove("hidden");
-      document.getElementById("done-msg").textContent = "Guardando tu tiempo...";
+
+      document.getElementById("done-msg").textContent =
+        `¡Excelente trabajo, ${sessionData.nombre}! Tu tiempo registrado es:`;
+      document.getElementById("done-time").textContent = tiempoInmediato;
+      document.getElementById("done-stats").textContent =
+        `Palabras encontradas: ${foundWords.size} de ${targetWords.length}`;
+      document.getElementById("done-sync").textContent = "Confirmando registro en la base...";
 
       try {
         const res = await callApi({
           action: "finalizar",
           fila: sessionData.fila,
-          cedula: sessionData.cedula,
+          nombre: sessionData.nombre,
           inicioMs: sessionData.inicioMs,
           encontradas: foundWords.size
         });
 
         if (res.ok) {
-          document.getElementById("done-msg").textContent =
-            `¡Excelente trabajo, ${sessionData.nombre}! Tu tiempo oficial es:`;
           document.getElementById("done-time").textContent = res.tiempo;
+          document.getElementById("done-sync").textContent = "✓ Participación guardada correctamente.";
         } else {
-          document.getElementById("done-msg").textContent = res.mensaje;
+          document.getElementById("done-sync").textContent = res.mensaje;
         }
       } catch (err) {
-        document.getElementById("done-msg").textContent =
-          "Completaste la sopa, pero hubo un problema de red al confirmar el cierre.";
+        document.getElementById("done-sync").textContent =
+          "Actividad finalizada (verifica tu conexión si el estado no se confirma).";
       }
     }
   </script>
