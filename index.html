@@ -172,7 +172,7 @@
       display: flex;
       justify-content: space-between;
       gap: 8px;
-      padding: 5px 0;
+      padding: 6px 0;
       border-bottom: 1px dashed #e5e7eb;
     }
 
@@ -294,7 +294,7 @@
       justify-content: center;
       align-items: center;
       font-weight: 800;
-      font-size: clamp(13px, 4vw, 18px);
+      font-size: clamp(12px, 3.6vw, 17px);
       color: var(--text);
       transition: background 0.12s, color 0.12s;
     }
@@ -391,12 +391,8 @@
           <span class="profile-val" id="info-cedula">-</span>
         </div>
         <div class="profile-row">
-          <span class="profile-label">Empresa / Agencia:</span>
+          <span class="profile-label">Agencia:</span>
           <span class="profile-val" id="info-agencia">-</span>
-        </div>
-        <div class="profile-row">
-          <span class="profile-label">Cargo:</span>
-          <span class="profile-val" id="info-puesto">-</span>
         </div>
         <div class="profile-row">
           <span class="profile-label">Correo:</span>
@@ -456,7 +452,7 @@
     let startTimeClient = 0;
     let juegoFinalizado = false;
 
-    let gridSize = 10;
+    let gridSize = 11;
     let board = [];
     let targetWords = [];
     let foundWords = new Set();
@@ -525,8 +521,7 @@
         document.getElementById("badge-trivia").textContent = `${res.codigoTrivia} • ${res.cantidadPalabras} PALABRAS`;
         document.getElementById("info-nombre").textContent = validatedUser.nombre;
         document.getElementById("info-cedula").textContent = validatedUser.cedula;
-        document.getElementById("info-agencia").textContent = [validatedUser.empresa, validatedUser.agencia].filter(Boolean).join(" - ");
-        document.getElementById("info-puesto").textContent = validatedUser.puesto || "-";
+        document.getElementById("info-agencia").textContent = validatedUser.agencia || "-";
         document.getElementById("info-correo").textContent = validatedUser.correo || "-";
 
         document.getElementById("view-login").classList.add("hidden");
@@ -577,7 +572,9 @@
         };
 
         targetWords = res.palabras;
-        gridSize = res.gridSize || 10;
+        const maxLenPalabras = targetWords.reduce((max, w) => Math.max(max, w.length), 0);
+        const maxN = Math.max(maxLenPalabras, Number(res.gridSize) || 0);
+        gridSize = maxN + 1;
 
         iniciarJuego();
       } catch (err) {
@@ -799,7 +796,6 @@
       juegoFinalizado = true;
       clearInterval(timerInterval);
 
-      // Cálculo inmediato del tiempo en pantalla para evitar lag de 00:00:00
       const segundosTranscurridos = (Date.now() - startTimeClient) / 1000;
       const tiempoInmediato = formatearSegundosHHMMSS(segundosTranscurridos);
 
